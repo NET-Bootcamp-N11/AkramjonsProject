@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
 using Npgsql;
+using Dapper;
 
 
 
@@ -17,27 +18,29 @@ namespace WebApplication3.Controllers
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_pgConnector))
             {
-                connection.Open();
-                string query = $"select id,name from experiment where id = {id};";
-                using NpgsqlCommand cmd = new NpgsqlCommand(query, connection);
-
-                var result = cmd.ExecuteReader();
-                List<experiment> list = new List<experiment>();
-
-                while (result.Read())
-                {
-                    list.Add(new experiment
-                    {
-                        id = (int)result[0],
-                        name = (string)result[1]
-                    }) ;
-                }
-
-
-                return list;
+                string query = $"select id,name from experiment where id = @id;";
+                return connection.Query<experiment>(query, new { id = id}).ToList();
             }
         }
-
-        
+        [HttpDelete]
+        public string Delete(int id) 
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_pgConnector))
+            {
+                string query = $"delete from experiment where id = @id;";
+                connection.Execute(query, new { id = id});
+                return "already delete ";
+            }
+        }
+        [HttpPatch]
+        public string Patch(int id,int new_name) 
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_pgConnector))
+            {
+                string query = $"update experiment set name=@name where id =@id;";
+                connection.Execute(query, new { name = new_name,id = id });
+                return "already delete ";
+            }
+        }
     }
 }
