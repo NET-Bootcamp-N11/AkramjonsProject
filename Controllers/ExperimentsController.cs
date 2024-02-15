@@ -32,7 +32,7 @@ namespace WebApplication3.Controllers
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_pgConnector))
             {
-                string query = "select * from experiment where id = @id;";
+                string query = "select  * from experiment where id = @id;";
                 return connection.Query<experiment>(query, new { id = id }).ToList();
             }
         }
@@ -109,7 +109,7 @@ namespace WebApplication3.Controllers
         }
         #endregion
 
-        #region
+        #region update patch
         [HttpPatch]
         [Route("Update/NameById")]
         public string UpdateNameById(int id,string name) 
@@ -129,7 +129,20 @@ namespace WebApplication3.Controllers
             {
                 string query = $"update experiment set age=@age where id =@id;";
                 connection.Execute(query, new { age = age, id = id });
-                return "already delete ";
+                return "Update";
+            }
+        }
+        #endregion
+
+        #region 
+        [HttpPut]
+        public string UpdateAll(int old_id, string name, int age) 
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_pgConnector)) 
+            {
+                string query = "Update experiment set name = @name, age = @age where id = @id";
+                connection.Execute(query, new { old_id = old_id, name = name, age = age });
+                return "Update";
             }
         }
         #endregion
